@@ -99,7 +99,8 @@ public class ResourcePackRefresher implements ModInitializer {
       Collection<ServerPlayerEntity> players) {
     ResourcePackConfig.RPOption rpOption = rpOptionHashMap.get(packname);
     if (rpOption == null) {
-      commandContext.getSource().sendFeedback(Text.literal("Packname: ").append(packname).append(" was not found"),
+      commandContext.getSource().sendFeedback(
+          () -> Text.literal("Packname: ").append(packname).append(" was not found"),
           false);
       return 1;
     }
@@ -108,7 +109,7 @@ public class ResourcePackRefresher implements ModInitializer {
     players.forEach(player -> {
       sendResourcePack(player, resourcePackMd5);
     });
-    commandContext.getSource().sendFeedback(Text.literal("Enabled pack: ").append(rpOption.packname), false);
+    commandContext.getSource().sendFeedback(() -> Text.literal("Enabled pack: ").append(rpOption.packname), false);
     return 1;
   }
 

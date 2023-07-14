@@ -3,7 +3,7 @@
   "injectors": {
     "defaultRequire": 1
   },
-  "mixins": [""],
-  "package": "net.atomys.resourcepackrefresher.mixins",
+  "mixins": [],
+  "package": "codes.atomys.resourcepackrefresher.mixins",
   "required": true
 }

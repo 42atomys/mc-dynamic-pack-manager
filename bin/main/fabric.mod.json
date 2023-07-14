@@ -20,11 +20,11 @@
   "license": "MIT",
   "mixins": [
     {
-      "config": "resourcepackrefresher.mixins.json",
+      "config": "rpr.mixins.json",
       "environment": "*"
     }
   ],
   "name": "ResourcePacks Refresher",
   "schemaVersion": 1,
-  "version": "1.0.0-1.19.4"
+  "version": "1.0.0-1.20.1"
 }
