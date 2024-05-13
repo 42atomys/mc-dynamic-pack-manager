@@ -65,6 +65,12 @@ This project supports development with a DevContainer to provide a consistent de
 
 The DevContainer configuration is located in `.devcontainer/devcontainer.json`.
 
+## How to update to the new minecraft version
+
+1. Go to https://fabricmc.net/develop/ 
+2. Take the new values for `gradle.properties`
+3. Test build locally with `make build`
+4. Push the changes
 
 ## License
 
