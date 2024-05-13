@@ -57,10 +57,6 @@ public class ResourcePackRefresher implements ModInitializer {
     getConfig().packs.forEach(rpOption -> {
       rpOptionHashMap.put(rpOption.packname, rpOption);
     });
-
-    // STARTED = CriteriaAccessor.callRegister(new CustomCriterion("started"));
-    // FINISHED = CriteriaAccessor.callRegister(new CustomCriterion("finished"));
-    // FAILED = CriteriaAccessor.callRegister(new CustomCriterion("failed"));
   }
 
   public static ResourcePackConfig getConfig() {
@@ -119,12 +115,6 @@ public class ResourcePackRefresher implements ModInitializer {
     if (rpOption == null) {
       return;
     }
-
-    // if (getConfig().autoRevoke) {
-    //   STARTED.revoke(player);
-    //   FINISHED.revoke(player);
-    //   FAILED.revoke(player);
-    // }
 
     SendResourcePackTask sendResourcePackTask = new SendResourcePackTask(new ServerResourcePackProperties(
       UUID.randomUUID(),
