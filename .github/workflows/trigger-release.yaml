@@ -66,6 +66,10 @@ jobs:
     name: Release it 🚀
     uses: ./.github/workflows/build-and-publish.yaml
     needs: [detect_versions, create_tag]
+    secrets: 
+      MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
     with:
       version: ${{ needs.detect_versions.outputs.version }}
+      mod_version: ${{ needs.detect_versions.outputs.mod_version }}
+      minecraft_version: ${{ needs.detect_versions.outputs.minecraft_version }}
     
