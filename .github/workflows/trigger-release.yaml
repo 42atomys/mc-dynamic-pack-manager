@@ -10,6 +10,11 @@ on:
       version:
         description: 'Version to release (ex: 1.0.0-1.20.1)'
         required: true
+  workflow_call:
+    secrets:
+      MODRINTH_TOKEN:
+        description: 'Token for Modrinth API'
+        required: true
 
 permissions:
   contents: write
