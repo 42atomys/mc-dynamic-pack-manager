@@ -71,6 +71,7 @@ jobs:
     name: Release it 🚀
     uses: ./.github/workflows/build-and-publish.yaml
     needs: [detect_versions, create_tag]
+    if: needs.detect_versions.outputs.trigger == 'true'
     secrets: 
       MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
     with:
