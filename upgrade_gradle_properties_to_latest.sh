@@ -17,7 +17,7 @@ export YARN_VERSION=$(curl -s https://meta.fabricmc.net/v2/versions/yarn | jq -r
 # Get the version of the fabric api for the game version
 export FABRIC_API_VERSION=$(curl -s "https://api.modrinth.com/v2/project/fabric-api/version?game_versions=%5B%22$GAME_VERSION%22%5D" | jq -r 'sort_by(.date_published) | .[-1].version_number')
 # Get the version of the fabric loom plugin
-export LOOM_VERSION=$(curl -s "https://maven.fabricmc.net/fabric-loom/fabric-loom.gradle.plugin/maven-metadata.xml" | xmllint --xpath "string(//metadata/versioning/latest)" -)
+export LOOM_VERSION=$(curl -s "https://maven.fabricmc.net/fabric-loom/fabric-loom.gradle.plugin/maven-metadata.xml" | xmllint --xpath "//metadata/versioning/versions/version[contains(., '-SNAPSHOT')]" - | grep -oP '>[0-9\.-]+-SNAPSHOT<' | tail -1 | sed 's/[><]//g')
 
 # Update the gradle.properties file
 echo "> Updating gradle.properties with the latest versions..."
