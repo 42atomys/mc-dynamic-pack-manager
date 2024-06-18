@@ -1,3 +1,5 @@
+GRADLE_VERSION = 8.8
+
 build: update
 	gradle build
 run:
@@ -15,8 +17,8 @@ update:
 upgrade:
 	bash ./upgrade_gradle_properties_to_latest.sh
 
-# Think to update gradle/wrapper/gradle-wrapper.properties file
 gradle-update:
-	gradle wrapper --gradle-version 8.7 --distribution-type all
+	@echo "Update gradle wrapper to version $(GRADLE_VERSION)"
+	@bash ./upgrade_gradle.sh $(GRADLE_VERSION)
 
 .PHONY: build run clean test package

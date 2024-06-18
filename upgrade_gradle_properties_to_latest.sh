@@ -10,6 +10,8 @@ fi
 echo "> Fetching latest versions of the game, loader, yarn mappings, fabric api, and loom plugin..."
 # Get the latest version of the game
 export GAME_VERSION=$(curl -s https://meta.fabricmc.net/v2/versions/game | jq -r '[.[] | select(.stable == true)] | sort_by(.version) | .[-1].version')
+# Get the release version (1.20 for 1.20.2)
+export GAME_RELEASE=$(echo $GAME_VERSION | cut -d '.' -f 1,2)
 # Get the latest version of the loader
 export LOADER_VERSION=$(curl -s https://meta.fabricmc.net/v2/versions/loader | jq -r '[.[] | select(.stable == true)] | .[0].version')
 # Get the version of the yarn mappings for the game version
@@ -27,6 +29,7 @@ if [[ "$CI" = "true" ]]; then
   echo "> Running in CI export env to $GITHUB_OUTPUT"
 
   echo "game_version=$GAME_VERSION" >> "$GITHUB_OUTPUT"
+  echo "game_release=$GAME_RELEASE" >> "$GITHUB_OUTPUT"
   echo "loader_version=$LOADER_VERSION" >> "$GITHUB_OUTPUT"
   echo "yarn_version=$YARN_VERSION" >> "$GITHUB_OUTPUT"
   echo "fabric_api_version=$FABRIC_API_VERSION" >> "$GITHUB_OUTPUT"
@@ -36,6 +39,7 @@ else
 fi
 
 echo " | game_version=$GAME_VERSION"
+echo " | game_release=$GAME_RELEASE"
 echo " | loader_version=$LOADER_VERSION"
 echo " | yarn_version=$YARN_VERSION"
 echo " | fabric_api_version=$FABRIC_API_VERSION"
