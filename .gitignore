@@ -14,6 +14,7 @@ gradle-app.setting
 
 # Cache of project
 .gradletasknamecache
+remappedSrc
 
 # Eclipse Gradle plugin generated files
 # Eclipse Core
