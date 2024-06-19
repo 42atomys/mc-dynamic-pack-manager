@@ -33,6 +33,10 @@ processResources {
 	filesMatching("fabric.mod.json") {
 		expand "version": project.version
 	}
+
+  from('assets') {
+    into 'assets'
+  }
 }
 
 tasks.withType(JavaCompile).configureEach {

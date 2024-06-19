@@ -1,18 +1,30 @@
 {
-  "authors": ["atomys"],
+  "authors": ["@42atomys"],
+  "contributors": ["@42atomys"],
   "contact": {
     "homepage": "https://github.com/42atomys/fabric-resourcepack-refresher",
-    "sources": "https://github.com/42atomys/fabric-resourcepack-refresher"
+    "sources": "https://github.com/42atomys/fabric-resourcepack-refresher",
+    "issues": "https://github.com/42atomys/fabric-resourcepack-refresher/issues"
   },
   "depends": {
     "fabric": "*",
     "fabricloader": ">=0.11.3"
   },
-  "description": "Allows the changing and refreshing of server resourcepacks through a command!",
+  "description": "Fabric Resource Pack Refresher is a mod for Minecraft that allows server administrators to refresh the resource pack on a client's game without the need for the client to relog. This can be particularly useful for servers that frequently update their resource packs.",
   "entrypoints": {
     "main": [
       "codes.atomys.resourcepackrefresher.ResourcePackRefresher"
     ]
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.github_releases": "https://github.com/42atomys/fabric-resourcepack-refresher/releases",
+        "modmenu.modrinth": "https://modrinth.com/mod/resource-pack-refresher",
+        "modmenu.github_sponsors": "https://github.com/sponsors/42atomys"
+      },
+      "update_checker": true
+    }
   },
   "environment": "*",
   "icon": "assets/resourcepackrefresher/icon.png",

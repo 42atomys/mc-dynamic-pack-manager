@@ -22,10 +22,16 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.SendResourcePackTask;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.text.TextColor;
+import net.minecraft.util.Formatting;
 
 public class ResourcePackRefresher implements ModInitializer {
   public static final String MOD_ID = "resourcepackrefresher";
+  public static final Style SUCCESS_STYLE = Style.EMPTY.withColor(TextColor.fromFormatting(Formatting.GREEN));
+  public static final Style ERROR_STYLE = Style.EMPTY.withColor(TextColor.fromFormatting(Formatting.RED));
+
   public static ConfigManager.SingleConfigManager configManager = new ConfigManager.SingleConfigManager(MOD_ID,
       new ResourcePackConfig());
 
@@ -104,7 +110,9 @@ public class ResourcePackRefresher implements ModInitializer {
 
     String resourcePackMd5 = ChecksumHelper.getMD5Checksum(rpOption.url);
     if (resourcePackMd5.isEmpty()) {
-      commandContext.getSource().sendFeedback(() -> Text.literal("Failed to send pack: ").append(rpOption.packname).append(". Please check the logs"), false);
+      commandContext.getSource().sendFeedback(() -> Text.literal("Failed to send pack: ").append(rpOption.packname).append(". The URL ").append(
+        Text.literal(rpOption.url).setStyle(Style.EMPTY.withColor(TextColor.fromFormatting(Formatting.GOLD)))
+      ).append(" are not a valid file or website are unreachable").setStyle(ERROR_STYLE), false);
       return 1;
     }
 
