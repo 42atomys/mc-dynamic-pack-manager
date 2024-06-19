@@ -101,7 +101,12 @@ public class ResourcePackRefresher implements ModInitializer {
           false);
       return 1;
     }
+
     String resourcePackMd5 = ChecksumHelper.getMD5Checksum(rpOption.url);
+    if (resourcePackMd5.isEmpty()) {
+      commandContext.getSource().sendFeedback(() -> Text.literal("Failed to send pack: ").append(rpOption.packname).append(". Please check the logs"), false);
+      return 1;
+    }
 
     players.forEach(player -> {
       sendResourcePack(player, resourcePackMd5);

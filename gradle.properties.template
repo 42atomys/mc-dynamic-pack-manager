@@ -14,6 +14,6 @@ fabric_version=${FABRIC_API_VERSION}
 loom_version=${LOOM_VERSION}
 
 # Mod Properties
-mod_version=1.1.0-${GAME_VERSION}
+mod_version=1.2.0-${GAME_VERSION}
 maven_group=codes.atomys
 archives_base_name=resourcepackrefresher
