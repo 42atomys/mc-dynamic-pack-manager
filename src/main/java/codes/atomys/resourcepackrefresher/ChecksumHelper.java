@@ -4,6 +4,7 @@ package codes.atomys.resourcepackrefresher;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URLConnection;
 import java.security.MessageDigest;
@@ -24,8 +25,8 @@ public abstract class ChecksumHelper {
       BigInteger bigInt = new BigInteger(1, md5sum);
       String output = bigInt.toString(16);
       return output;
-    } catch (FileNotFoundException e) {
-      System.err.println("[" + ResourcePackRefresher.MOD_ID + "]: The resourcepack url: "+ url +" is not a valid file. Please check your configuration.");
+    } catch (FileNotFoundException | NullPointerException | IllegalArgumentException | MalformedURLException e) {
+      System.err.println("[" + ResourcePackRefresher.MOD_ID + "]: The resourcepack url: "+ url +" is not a valid URL or ZIP file. Please check your configuration.");
     } catch (Exception e) {
       e.printStackTrace();
     }
