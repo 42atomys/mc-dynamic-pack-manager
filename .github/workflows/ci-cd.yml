@@ -58,6 +58,8 @@ jobs:
           name: Dynamic Pack Languages v${{ env.mod_version }}
           version: v${{ env.mod_version }}
           version-type: release
+          loaders: |
+            minecraft
           files: |
             DynamicPackLanguages-${{ env.mod_version }}.zip
 
