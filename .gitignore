@@ -1,7 +1,28 @@
-.gradle
+# gradle
+
+.gradle/
+build/
+out/
+classes/
+
+# macos
+
+*.DS_Store
+
+# projects
+run/
+bin/
+
+# java
+hs_err_*.log
+replay_*.log
+*.hprof
+*.jfr
+
 **/build/
 bin/*
 !src/**/build/
+.architectury-transformer
 
 # Ignore Gradle GUI config
 gradle-app.setting

@@ -1,0 +1,136 @@
+name: CI/CD 🚀
+
+on:
+  push:
+    paths-ignore:
+      - "docs/**"
+      - "README.md"
+      - "LICENSE.txt"
+      - "CONTRIBUTING.md"
+  workflow_dispatch:
+    inputs:
+      release:
+        description: Publish a Release
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  id-token: write
+  attestations: write
+  contents: write
+
+jobs:
+  build-resource-pack:
+    name: Build Dynamic Resource Pack
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout this repository
+        uses: actions/checkout@v4
+
+      - name: Setup Environment Variables
+        run: |
+          cat $GITHUB_WORKSPACE/gradle.properties | grep ^mod_version >> $GITHUB_ENV
+
+      - name: Build resource pack
+        run: |
+          cd common/src/main/resources
+          zip -r DynamicPackLanguages-${{ env.mod_version }}.zip pack.mcmeta assets
+          mv DynamicPackLanguages-${{ env.mod_version }}.zip $GITHUB_WORKSPACE/build/DynamicPackLanguages-${{ env.mod_version }}.zip
+      
+      - uses: actions/upload-artifact@v4
+        with:
+          name: resource-pack
+          path: build/DynamicPackLanguages-${{ env.mod_version }}.zip
+
+      - uses: actions/attest-build-provenance@v1
+        name: Attest Build
+        with:
+          subject-path: |
+            build/DynamicPackLanguages-${{ env.mod_version }}.zip
+
+      - name: Publish Resource Pack
+        uses: Kir-Antipov/mc-publish@v3.3.0
+        if: ${{ github.event.inputs.release || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) }}
+        with:
+          modrinth-id: 1q2w3e4r
+          modrinth-token: "${{env.MODRINTH_TOKEN}}"
+          name: Dynamic Pack Languages v${{ env.mod_version }}
+          version: v${{ env.mod_version }}
+          version-type: release
+          files: |
+            build/DynamicPackLanguages-${{ env.mod_version }}.zip
+
+  build-mod:
+    name: Build Dynamic Pack Mod
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout this repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "21"
+          check-latest: true
+          cache: "gradle"
+          cache-dependency-path: |
+            **/*.gradle*
+            **/**/gradle-wrapper.properties
+
+      - name: Check gradle validation
+        uses: gradle/actions/wrapper-validation@v4
+
+      - name: Set Gradlew permissions
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build --stacktrace
+
+      - name: Setup Environment Variables
+        run: |
+          cat $GITHUB_WORKSPACE/gradle.properties | grep ^supported_minecraft_versions >> $GITHUB_ENV
+          cat $GITHUB_WORKSPACE/gradle.properties | grep ^minecraft_version >> $GITHUB_ENV
+          cat $GITHUB_WORKSPACE/gradle.properties | grep ^mod_version >> $GITHUB_ENV
+
+      - name: Archives Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: dynamic_pack_manager-${{ env.mod_version }}-mc${{ env.minecraft_version }}
+          path: |
+            build/reports/
+            **/build/reports/
+            build/libs
+            **/build/libs/
+
+      - uses: actions/attest-build-provenance@v1
+        name: Attest Build
+        with:
+          subject-path: |
+            build/libs
+            **/build/libs/
+
+      - name: Release Version to GitHub
+        uses: softprops/action-gh-release@v1
+        id: gh_release
+        if: ${{ github.event.inputs.release || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) }}
+        with:
+          body_path: ${{ github.workspace }}/build/CHANGELOG.md
+          tag_name: v${{ env.mod_version }}-${{ env.minecraft_version }}
+          name: v${{ env.mod_version }}-${{ env.minecraft_version }}
+          target_commitish: ${{ github.sha }}
+          files: |
+            **/build/libs/dynamic_pack_manager-*-fabric-*.jar
+            **/build/libs/dynamic_pack_manager-*-forge-*.jar
+            **/build/libs/dynamic_pack_manager-*-neoforge-*.jar
+
+      - name: Release Version to 3rd Parties
+        uses: gradle/gradle-build-action@v2
+        if: ${{ github.event.inputs.release || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CURSE_API_KEY: ${{ secrets.CURSE_API_KEY }}
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_API_KEY }}
+        with:
+          arguments: publish publishUnified --stacktrace

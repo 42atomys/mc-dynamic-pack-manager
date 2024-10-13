@@ -1,0 +1,31 @@
+modLoader = "javafml"
+loaderVersion = "*"
+license = "MIT"
+displayURL = "https://github.com/42atomys/mc-dynamic-pack-manager"
+issueTrackerURL="https://github.com/42atomys/mc-dynamic-pack-manager/issues"
+
+[[mods]]
+modId = "dynamic_pack_manager"
+version = "${version}"
+displayName = "Dynamic Pack Refresher"
+updateJSONURL="https://api.modrinth.com/updates/dynamic-pack-manager/forge_updates.json"
+displayURL="https://modrinth.com/mod/dynamic-pack-manager"
+logoFile="icon.png"
+authors = "@42atomys"
+description = '''
+Allows server administrators to refresh the resource pack on a client's game without the need for the client to relog.
+'''
+
+[[dependencies.dynamic_pack_manager]]
+modId = "forge"
+mandatory = true
+versionRange = "[48,)"
+ordering = "NONE"
+side = "SERVER"
+
+[[dependencies.dynamic_pack_manager]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.21,)"
+ordering = "NONE"
+side = "BOTH"

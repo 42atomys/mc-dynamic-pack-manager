@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "dynamic_pack_manager",
+  "version": "${version}",
+  "name": "Dynamic Pack Refresher",
+  "description": "Allows server administrators to refresh the resource pack on a client's game without the need for the client to relog.",
+  "icon": "icon.png",
+  "authors": [
+    "@42atomys"
+  ],
+  "contact": {
+    "homepage": "https://github.com/42atomys/mc-dynamic-pack-manager",
+    "sources": "https://github.com/42atomys/mc-dynamic-pack-manager",
+    "issues": "https://github.com/42atomys/mc-dynamic-pack-manager/issues"
+  },
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "codes.atomys.dynamicpack.DynamicPackManagerFabric"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.15.11",
+    "minecraft": ">=1.21"
+  },
+  "accessWidener" : "dynamic_pack_manager.accesswidener",
+  "mixins": ["dynamic_pack_manager.mixins.json", "dynamic_pack_manager.fabric.mixins.json"]
+}

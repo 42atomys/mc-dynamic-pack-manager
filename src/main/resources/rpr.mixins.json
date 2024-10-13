@@ -1,9 +1,0 @@
-{
-  "compatibilityLevel": "JAVA_21",
-  "injectors": {
-    "defaultRequire": 1
-  },
-  "mixins": [],
-  "package": "codes.atomys.resourcepackrefresher.mixins",
-  "required": true
-}
