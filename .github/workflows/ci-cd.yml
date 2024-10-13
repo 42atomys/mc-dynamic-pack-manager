@@ -36,30 +36,30 @@ jobs:
         run: |
           cd common/src/main/resources
           zip -r DynamicPackLanguages-${{ env.mod_version }}.zip pack.mcmeta assets
-          mv DynamicPackLanguages-${{ env.mod_version }}.zip $GITHUB_WORKSPACE/build/DynamicPackLanguages-${{ env.mod_version }}.zip
+          mv DynamicPackLanguages-${{ env.mod_version }}.zip $GITHUB_WORKSPACE/DynamicPackLanguages-${{ env.mod_version }}.zip
       
       - uses: actions/upload-artifact@v4
         with:
           name: resource-pack
-          path: build/DynamicPackLanguages-${{ env.mod_version }}.zip
+          path: DynamicPackLanguages-${{ env.mod_version }}.zip
 
       - uses: actions/attest-build-provenance@v1
         name: Attest Build
         with:
           subject-path: |
-            build/DynamicPackLanguages-${{ env.mod_version }}.zip
+            DynamicPackLanguages-${{ env.mod_version }}.zip
 
       - name: Publish Resource Pack
         uses: Kir-Antipov/mc-publish@v3.3.0
         if: ${{ github.event.inputs.release || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) }}
         with:
-          modrinth-id: 1q2w3e4r
-          modrinth-token: "${{env.MODRINTH_TOKEN}}"
+          modrinth-id: ce851HU1
+          modrinth-token: ${{ secrets.MODRINTH_API_KEY }}
           name: Dynamic Pack Languages v${{ env.mod_version }}
           version: v${{ env.mod_version }}
           version-type: release
           files: |
-            build/DynamicPackLanguages-${{ env.mod_version }}.zip
+            DynamicPackLanguages-${{ env.mod_version }}.zip
 
   build-mod:
     name: Build Dynamic Pack Mod
