@@ -42,7 +42,7 @@ public record DynamicPack(String packname, String url, boolean required, Optiona
    */
   public static final DynamicPack defaultpack = from(
     "dynamicpack_translations",
-    "https://github.com/42atomys/mc-dynamic-pack-manager/raw/refs/heads/main/resourcepack_v2.0.0.zip",
+    "https://cdn.modrinth.com/data/ce851HU1/versions/ZdCyMNHL/DynamicPackLanguages-2.0.0.zip",
     true,
     Optional.of("The mod have dynamic resource packs itself, this is cool not ?"),
     Optional.empty(),
