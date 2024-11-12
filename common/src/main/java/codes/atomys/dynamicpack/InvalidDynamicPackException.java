@@ -6,7 +6,8 @@ import net.minecraft.network.chat.Component;
  * Exception thrown when a dynamic pack is invalid.
  */
 public class InvalidDynamicPackException extends RuntimeException {
-  private Component compoment;
+  private transient Component compoment;
+  private static final long serialVersionUID = 1L;
 
   /**
    * Constructs a new InvalidDynamicPackException with the specified detail message.
