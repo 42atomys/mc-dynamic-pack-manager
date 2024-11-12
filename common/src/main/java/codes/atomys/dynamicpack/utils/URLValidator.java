@@ -28,6 +28,8 @@ public final class URLValidator {
    * Exception thrown when a resource pack URL is invalid.
    */
   public static class InvalidResourcePackURLException extends InvalidDynamicPackException {
+    private static final long serialVersionUID = 1L;
+    
     /**
      * Constructs a InvalidResourcePackURLException.of with the specified detail message.
      *
