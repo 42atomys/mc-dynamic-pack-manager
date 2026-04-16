@@ -5,7 +5,6 @@ import codes.atomys.dynamicpack.utils.Utils;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.ClientSuggestionProvider;
-import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.RegistryAccess;
@@ -49,8 +48,7 @@ abstract class ClientPacketListenerMixin {
     // to be in the same dispatcher and completion results.
     // ClientCommandInternals.addCommands((CommandDispatcher) commandDispatcher,
     //     (FabricClientCommandSource) commandSource);
-    Utils.LOGGER.info("[DynamicPackManager] handle commands: " + packet.getRoot(CommandBuildContext.simple(this.registryAccess, this.enabledFeatures)));
-    // this.commands = new CommandDispatcher<>(packet.getRoot(CommandBuildContext.simple(this.registryAccess, this.enabledFeatures)));
+    Utils.LOGGER.info("[DynamicPackManager] handle commands");
   }
 
   @Inject(method = "sendUnsignedCommand", at = @At("HEAD"), cancellable = true)

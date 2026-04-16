@@ -70,11 +70,11 @@ jobs:
       - name: Checkout this repository
         uses: actions/checkout@v4
 
-      - name: Setup Java 21
+      - name: Setup Java 25
         uses: actions/setup-java@v4
         with:
           distribution: "temurin"
-          java-version: "21"
+          java-version: "25"
           check-latest: true
           cache: "gradle"
           cache-dependency-path: |
@@ -124,7 +124,6 @@ jobs:
           target_commitish: ${{ github.sha }}
           files: |
             **/build/libs/dynamic_pack_manager-*-fabric-*.jar
-            **/build/libs/dynamic_pack_manager-*-forge-*.jar
             **/build/libs/dynamic_pack_manager-*-neoforge-*.jar
 
       - name: Release Version to 3rd Parties

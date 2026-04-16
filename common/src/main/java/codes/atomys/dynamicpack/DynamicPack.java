@@ -34,8 +34,12 @@ import org.jetbrains.annotations.Nullable;
  * @param message the prompt message to display
  * @param uuid the uuid of the pack
  * @param hash the hash of the pack
+ * @param version the cache-busting version stamp (epoch seconds). Stable across
+ *     sends so that clients recognize the pack and skip the "Process" prompt
+ *     after the first acceptance. Bump it via {@link #withRefreshedVersion()}
+ *     to force clients to redownload.
  */
-public record DynamicPack(String packname, String url, boolean required, Optional<String> message, UUID uuid, String hash) {
+public record DynamicPack(String packname, String url, boolean required, Optional<String> message, UUID uuid, String hash, long version) {
   /**
    * This is the default pack used to initialize the configuration file if the
    * configuration file is not found (on the first run of the server).
@@ -68,7 +72,7 @@ public record DynamicPack(String packname, String url, boolean required, Optiona
       final Optional<UUID> uuid, final Optional<String> hash) {
     final UUID uUID = uuid.orElseGet(() -> UUID.nameUUIDFromBytes(url.getBytes(StandardCharsets.UTF_8)));
 
-    return new DynamicPack(packname, url, required, message, uUID, hash.orElse(""));
+    return new DynamicPack(packname, url, required, message, uUID, hash.orElse(""), Instant.now().getEpochSecond());
   }
 
   /**
@@ -84,11 +88,14 @@ public record DynamicPack(String packname, String url, boolean required, Optiona
   }
 
   /**
-   * Returns the pack's URL with a version string appended.
+   * Returns the pack's URL with a stable version string appended.
    * <p>
-   * The version string is in the format "v=Instant.now().toString()" and is
-   * appended to the URL using the appropriate separator
-   * (either "?" or "&amp;").
+   * The version string is {@code v=<pack.version()>} (epoch seconds captured
+   * at pack creation or last refresh). It stays identical across successive
+   * {@code /dynamicpack send} invocations so that a client which already
+   * accepted the pack does not see the "Process" prompt again. To force
+   * clients to redownload (because the zip at the URL was replaced), call
+   * {@link #withRefreshedVersion()} and persist the new pack.
    * </p>
    *
    * @return the pack's URL with a version string appended
@@ -98,7 +105,7 @@ public record DynamicPack(String packname, String url, boolean required, Optiona
       final URI uri = new URI(this.url());
       final String separator = uri.getQuery() != null ? "&" : "?";
 
-      return this.url() + separator + "v=" + Instant.now().toEpochMilli() / 1000;
+      return this.url() + separator + "v=" + this.version();
     } catch (final URISyntaxException e) {
       e.printStackTrace();
 
@@ -162,7 +169,7 @@ public record DynamicPack(String packname, String url, boolean required, Optiona
    * @return a new DynamicPack instance with the given name
    */
   public DynamicPack withName(final String name) {
-    return new DynamicPack(name, this.url(), this.required(), this.message(), this.uuid(), this.hash());
+    return new DynamicPack(name, this.url(), this.required(), this.message(), this.uuid(), this.hash(), this.version());
   }
 
   /**
@@ -172,11 +179,24 @@ public record DynamicPack(String packname, String url, boolean required, Optiona
    * @return a new DynamicPack instance with the given required flag
    */
   public DynamicPack withRequired(final boolean required) {
-    return new DynamicPack(this.packname(), this.url(), required, this.message(), this.uuid(), this.hash());
+    return new DynamicPack(this.packname(), this.url(), required, this.message(), this.uuid(), this.hash(), this.version());
   }
 
   private DynamicPack withHash(final String hash) {
-    return new DynamicPack(this.packname(), this.url(), this.required(), this.message(), this.uuid(), hash);
+    return new DynamicPack(this.packname(), this.url(), this.required(), this.message(), this.uuid(), hash, this.version());
+  }
+
+  /**
+   * Returns a copy of this pack with the version stamp refreshed to the
+   * current epoch seconds. Use this to force clients to redownload the pack
+   * (e.g. after replacing the zip at the same URL). The bumped version
+   * invalidates the client-side HTTP cache and regenerates the cache-busted
+   * URL returned by {@link #versionnedUrl()}.
+   *
+   * @return a new DynamicPack instance with a fresh version stamp
+   */
+  public DynamicPack withRefreshedVersion() {
+    return new DynamicPack(this.packname(), this.url(), this.required(), this.message(), this.uuid(), this.hash(), Instant.now().getEpochSecond());
   }
 
   /**
@@ -190,7 +210,7 @@ public record DynamicPack(String packname, String url, boolean required, Optiona
       message = Optional.empty();
     }
 
-    return new DynamicPack(this.packname(), this.url(), this.required(), message, this.uuid(), this.hash());
+    return new DynamicPack(this.packname(), this.url(), this.required(), message, this.uuid(), this.hash(), this.version());
   }
 
   /**
@@ -238,7 +258,14 @@ public record DynamicPack(String packname, String url, boolean required, Optiona
    * @return 0
    */
   public int sendAddPacketToAll(final MinecraftServer server, final @Nullable String customMessage) {
-    this.sendToAllConnections(server, this.clientboundResourcePackPushPacket(customMessage));
+    final ClientboundResourcePackPushPacket packet = this.clientboundResourcePackPushPacket(customMessage);
+    server.getConnection().getConnections().forEach(connection -> {
+      if (SentPackTracker.hasSent(connection, this.uuid())) {
+        return;
+      }
+      connection.send(packet);
+      SentPackTracker.markSent(connection, this.uuid());
+    });
     return 0;
   }
 
@@ -255,8 +282,14 @@ public record DynamicPack(String packname, String url, boolean required, Optiona
    * @return 0
    */
   public int sendAddPacketToTargets(final MinecraftServer server, final Collection<ServerPlayer> targets, final @Nullable String customMessage) {
+    final ClientboundResourcePackPushPacket packet = this.clientboundResourcePackPushPacket(customMessage);
     for (final ServerPlayer serverplayer : targets) {
-      serverplayer.connection.send(this.clientboundResourcePackPushPacket(customMessage));
+      final net.minecraft.network.Connection connection = serverplayer.connection.connection;
+      if (SentPackTracker.hasSent(connection, this.uuid())) {
+        continue;
+      }
+      serverplayer.connection.send(packet);
+      SentPackTracker.markSent(connection, this.uuid());
     }
 
     return 0;
@@ -270,6 +303,7 @@ public record DynamicPack(String packname, String url, boolean required, Optiona
    */
   public int sendRemovePacketToAll(final MinecraftServer server) {
     this.sendToAllConnections(server, this.clientboundResourcePackPopPacket());
+    SentPackTracker.forgetOnAll(this.uuid());
     return 0;
   }
 
@@ -283,6 +317,7 @@ public record DynamicPack(String packname, String url, boolean required, Optiona
   public int sendRemovePacketToTargets(final MinecraftServer server, final Collection<ServerPlayer> targets) {
     for (final ServerPlayer serverplayer : targets) {
       serverplayer.connection.send(this.clientboundResourcePackPopPacket());
+      SentPackTracker.forget(serverplayer.connection.connection, this.uuid());
     }
 
     return 0;

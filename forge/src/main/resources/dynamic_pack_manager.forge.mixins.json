@@ -1,7 +1,0 @@
-{
-  "required": true,
-  "package": "codes.atomys.dynamicpack.mixin",
-  "compatibilityLevel": "JAVA_21",
-  "minVersion": "0.8",
-  "client": []
-}

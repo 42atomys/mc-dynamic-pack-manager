@@ -7,6 +7,7 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -60,6 +61,7 @@ public final class ModConfigurationFile {
       packConfig.set("message", pack.message().orElse(null));
       packConfig.set("uuid", pack.uuid().toString());
       packConfig.set("hash", pack.hash());
+      packConfig.set("version", pack.version());
       packConfigs.add(packConfig);
     }
     config.set("packs", packConfigs);
@@ -111,8 +113,13 @@ public final class ModConfigurationFile {
       final UUID uuid = uuidString != null ? UUID.fromString(uuidString)
           : UUID.nameUUIDFromBytes(url.getBytes(StandardCharsets.UTF_8));
       final String hash = packConfig.get("hash");
+      // Older configs predating the stable cache-buster don't persist a
+      // version. Fall back to "now" so the URL is stable from this load
+      // onwards; clients will see one prompt then cache the pack.
+      final Number rawVersion = packConfig.get("version");
+      final long version = rawVersion != null ? rawVersion.longValue() : Instant.now().getEpochSecond();
 
-      final DynamicPack pack = new DynamicPack(packname, url, required, message, uuid, hash);
+      final DynamicPack pack = new DynamicPack(packname, url, required, message, uuid, hash, version);
       Configuration.packs.add(pack);
     }
 

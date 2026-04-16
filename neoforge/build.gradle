@@ -1,5 +1,5 @@
 plugins {
-    id "com.github.johnrengelman.shadow" version "8.1.1" // Use Shadow to make a JAR with dependencies
+    id "com.gradleup.shadow" version "9.3.0" // Use Shadow to make a JAR with dependencies
 }
 
 configurations {
@@ -41,8 +41,8 @@ dependencies {
         exclude module: 'guava'
     }
 
-    common(project(path: ":common", configuration: "namedElements")) { transitive false }
-    shadowCommon(project(path: ":common", configuration: "transformProductionNeoForge")) { transitive = false }
+    common(project(path: ":common")) { transitive false }
+    shadowCommon(project(path: ":common")) { transitive = false }
 }
 
 processResources {
@@ -59,16 +59,9 @@ shadowJar {
     exclude "fabric.mod.json"
 
     configurations = [project.configurations.shadowCommon]
-    archiveClassifier.set("dev-shadow")
-}
-
-remapJar {
-    inputFile.set(shadowJar.archiveFile)
-    dependsOn(shadowJar)
     archiveClassifier.set("neoforge-${rootProject.minecraft_version}")
 
     from rootProject.file("LICENSE.txt")
-    atAccessWideners.add(loom.accessWidenerPath.get().asFile.name)
 }
 
 jar {
@@ -102,14 +95,14 @@ unifiedPublishing {
         gameVersions.set(mcVersions)
         gameLoaders = ["neoforge"]
 
-        mainPublication tasks.remapJar
+        mainPublication tasks.shadowJar
 
         var CURSE_API_KEY = project.findProperty("CURSE_API_KEY") ?: System.getenv("CURSE_API_KEY")
         if (CURSE_API_KEY != null && CURSE_API_KEY instanceof String) {
             curseforge {
                 token.set CURSE_API_KEY
                 id = rootProject.curseforge_id
-                gameVersions.addAll ("Java 21")
+                gameVersions.addAll ("Java 25")
                 releaseType = "beta"
             }
         }

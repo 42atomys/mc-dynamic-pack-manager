@@ -24,6 +24,7 @@
   "commands.dynamicpackmanager.add.error.not_a_zip_file": "the content type of the resource pack is not a ZIP file.",
   "commands.dynamicpackmanager.add.error.unknown_error": "an error occurred while validating the resource pack URL. See the stack trace for details.",
   "commands.dynamicpackmanager.add.error.invalid_uuid": "the UUID is not valid. This is an internal error, please report it to the developer.",
+  "commands.dynamicpackmanager.refresh.success": "Successfully refreshed dynamic pack %s (cache-buster bumped, all connected players re-downloading)",
   "commands.dynamicpackmanager.reloadconfig.success": "Successfully reloaded dynamic pack configuration",
   "commands.dynamicpackmanager.update.success": "Successfully updated dynamic pack %s's %s property",
   "commands.dynamicpackmanager.update.failure": "Failed to update dynamic pack %s's %s property ",

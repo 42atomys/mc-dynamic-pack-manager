@@ -11,6 +11,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
+import java.net.URI;
 import java.util.Collection;
 import java.util.Optional;
 import net.minecraft.ChatFormatting;
@@ -23,6 +24,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 
 /**
  * Write a doc.
@@ -51,7 +53,7 @@ public final class DynamicPackCommand {
     Utils.LOGGER.info("[DynamicPackManager] Command registered");
     dispatcher.register(
       Commands.literal("dynamicpack")
-        .requires(source -> source.hasPermission(2))
+        .requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
         .then(Commands.literal("list")
           .executes(ctx -> {
             if (Configuration.packs.isEmpty()) {
@@ -105,8 +107,8 @@ public final class DynamicPackCommand {
               .append(Component.translatable("text.dynamicpackmanager.support_us_on_patreon", Component.literal("Patreon").withStyle(style -> style.withUnderlined(true).withColor(ChatFormatting.GOLD))).withStyle(
                 style ->
                   style.withColor(ChatFormatting.GRAY)
-                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://patreon.com/42atomys"))
-                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("text.dynamicpackmanager.support_us_on_patreon.tooltip")))
+                    .withClickEvent(new ClickEvent.OpenUrl(URI.create("https://patreon.com/42atomys")))
+                    .withHoverEvent(new HoverEvent.ShowText(Component.translatable("text.dynamicpackmanager.support_us_on_patreon.tooltip")))
               ));
 
             ctx.getSource().sendSuccess(() -> message, true);
@@ -202,6 +204,12 @@ public final class DynamicPackCommand {
             )
           )
         )
+        .then(Commands.literal("refresh")
+          .then(Commands.argument("packname", StringArgumentType.word())
+            .suggests(SUGGEST_PACK)
+            .executes(ctx -> refreshPack(ctx))
+          )
+        )
         .then(Commands.literal("reloadconfig")
           .executes(ctx -> {
             ModConfigurationFile.load(Utils.getConfigurationFileType());
@@ -268,12 +276,32 @@ public final class DynamicPackCommand {
     final Collection<ServerPlayer> targets = EntityArgument.getPlayers(ctx, "targets");
     final DynamicPack dynamicpack = getPack(ctx);
 
-    // Send drop pack packet to targets to ensure no deprecated data are present
-    dynamicpack.sendRemovePacketToTargets(ctx.getSource().getServer(), targets);
-
-    // Send add pack packet to targets
+    // Push directly. Because DynamicPack.version() is stable across sends,
+    // the URL matches what the client already accepted — MC skips both the
+    // "Process" prompt and the redownload. Dropping the pop here also
+    // eliminates the unload/re-load flicker. Use /dynamicpack refresh to
+    // force a true refresh.
     dynamicpack.sendAddPacketToTargets(ctx.getSource().getServer(), targets, customMessage);
     ctx.getSource().sendSuccess(() -> Component.translatable("commands.dynamicpackmanager.send.success", dynamicpack.packname(), targets.size()).withStyle(ChatFormatting.GREEN), true);
+    return 1;
+  }
+
+  private static int refreshPack(final CommandContext<CommandSourceStack> ctx) {
+    final DynamicPack oldPack = getPack(ctx);
+    if (oldPack == null) {
+      return 0;
+    }
+
+    final DynamicPack refreshed = oldPack.withRefreshedVersion();
+    Configuration.packs.remove(oldPack);
+    Configuration.packs.add(refreshed);
+    ModConfigurationFile.saveRunnable.run();
+
+    // Pop then push so every client re-fetches with the new cache-buster.
+    refreshed.sendRemovePacketToAll(ctx.getSource().getServer());
+    refreshed.sendAddPacketToAll(ctx.getSource().getServer(), null);
+
+    ctx.getSource().sendSuccess(() -> Component.translatable("commands.dynamicpackmanager.refresh.success", refreshed.packname()).withStyle(ChatFormatting.GREEN), true);
     return 1;
   }
 

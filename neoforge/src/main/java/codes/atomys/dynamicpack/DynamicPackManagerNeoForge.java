@@ -28,7 +28,7 @@ public class DynamicPackManagerNeoForge {
   public DynamicPackManagerNeoForge(final IEventBus eventBus) {
     LOGGER.info("[DynamicPackManager] Starting...");
 
-    if (FMLEnvironment.dist != Dist.DEDICATED_SERVER) {
+    if (FMLEnvironment.getDist() != Dist.DEDICATED_SERVER) {
       LOGGER.warn("[DynamicPackManager] Only supported on dedicated server!");
     } else {
       ServerSetup.setup(eventBus);
